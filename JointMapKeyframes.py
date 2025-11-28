@@ -60,41 +60,30 @@ def AddItem(list,data,*arr):
         else:
             cmds.scrollField(inputUI,edit=True,text="")
             
-    def AddSource(inputUI,sourceName,*arr):
-        def SourceItem(name,*arrr):
-            sourcesUITemp = cmds.rowColumnLayout(nc=2)
-            cmds.textField(placeholderText="Bone Name",width=246,height=30,editable=False,text=data[0])
-            cmds.button(label="-",width=30,c=partial(RemoveSource,sources))
+    def AddSource(parentUI,sourcesUI,sourceName,*arr):
+        def RemoveSouceItem(parentUI,sourcesUI,sourceItemUI,sourceItemUIParent,*arr):
+            session["pairUI"][parentUI]["sources"].remove(sourceItemUI)
+            cmds.deleteUI(sourceItemUIParent)
+        
+            
+        def AddSourceItem(parentUI,sourcesUI,sourceName,*arrr):
+            sourceItemUIParent = cmds.rowColumnLayout(nc=2,parent=sourcesUI)
+            sourceItemUI = cmds.textField(placeholderText="Bone Name",width=240,height=30,editable=False,text=sourceName)            
+            session["pairUI"][parentUI]["sources"].append(sourceItemUI)
+            cmds.button(label="X",width=30,c=partial(RemoveSouceItem,parentUI,sourcesUI,sourceItemUI,sourceItemUIParent))
             cmds.setParent("..")
             
         if sourceName != "":
-            
-            
+            AddSourceItem(parentUI,sourcesUI,sourceName)            
         else: 
             sl = cmds.ls(selection=True)
             if sl:
-                currentSources = cmds.scrollField(inputUI,query=True,text=True)
-                currentSources = currentSources.split("\n")
                 for obj in sl:
                     if session['ignoreNamespace']:
                         obj = obj.split(":")[-1]
-                    if obj not in currentSources:                                      
-                        currentSources.append(obj)
+                    AddSourceItem(parentUI,sourcesUI,obj)
                 
-                cmds.scrollField(inputUI,edit=True,text=("\n").join(currentSources))
-                
-    def RemoveSource(inputUI,*arr):
-        sl = cmds.ls(selection=True)
-        if sl:
-            currentSources = cmds.scrollField(inputUI,query=True,text=True)
-            currentSources = currentSources.split("\n")
-            for obj in sl:
-                if session['ignoreNamespace']:
-                    obj = obj.split(":")[-1]
-                if obj in currentSources:                                      
-                    currentSources.remove(obj)
-            
-            cmds.scrollField(inputUI,edit=True,text=("\n").join(currentSources))
+
     
     def CreateMirror(listUI,parentUI,*arr):
         targetUI = session["pairUI"][parentUI][0]
@@ -135,7 +124,7 @@ def AddItem(list,data,*arr):
                     
 
     parentUI = cmds.rowColumnLayout(nc=5,parent=list,bgc=(.2,.2,.2)) 
-    
+    session["pairUI"][parentUI]={}
     cmds.rowColumnLayout(nc=1)
     
     if data:
@@ -148,6 +137,8 @@ def AddItem(list,data,*arr):
             if session['ignoreNamespace']:
                 obj = obj.split(":")[-1]
             cmds.textField(target,edit=True,text=obj)
+    session["pairUI"][parentUI]["target"] = target
+    session["pairUI"][parentUI]["sources"] = []
     cmds.setParent("..")
     
     cmds.rowColumnLayout(nc=1)
@@ -158,11 +149,11 @@ def AddItem(list,data,*arr):
     if data:        
         sourcesTemp = data[1].split("\n")
         for sourceTemp in sourceTemp:
-            AddSource(sources,sourceTemp)           
+            AddSource(parentUI,sources,sourceTemp)           
     cmds.setParent("..")
     
-    sources = cmds.rowColumnLayout(nc=1)
-    cmds.button(label="+",width=37,h=30,c=partial(AddSource,sources,""))    
+    cmds.rowColumnLayout(nc=1)
+    cmds.button(label="+",width=37,h=30,c=partial(AddSource,parentUI,sources,""))    
     cmds.setParent("..")
     
     cmds.rowColumnLayout(nc=3)    
@@ -172,7 +163,7 @@ def AddItem(list,data,*arr):
      
     cmds.setParent("..")
     
-    session["pairUI"][parentUI] = [target,sources]
+    #session["pairUI"][parentUI] = [target,sources]
 
 
 
