@@ -43,9 +43,6 @@ def DeleteBoolean(source,target):
             cmds.delete(newObj)
         else:
             newObjUUID = cmds.ls(newObj,uuid=True)
-            try:
-                cmds.delete(cmds.ls(newObjUUID), ch=True)
-            except:pass
     objDeletes = cmds.ls([source + "NLTA_dup",target + "NLTA_dup"])
     for objDelete in objDeletes:
         objTempUUID = cmds.ls(objDelete,uuid=True)
@@ -127,4 +124,3 @@ cmds.button(label="Delete Inverse", command=partial(DeleteIntersect,True),height
 cmds.button(label="Delete Boolean", command=DeleteBooleanRun,height=50)
 cmds.setParent("..")
 cmds.showWindow(window)
-
