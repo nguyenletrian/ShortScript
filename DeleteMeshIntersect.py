@@ -21,6 +21,8 @@ def get_face_centroids(mesh):
     return centroids
 
 def FindMatchingFaces(source,target, tolerance=0.001):
+    print(source)
+    print(target)
     centA = get_face_centroids(source)
     centB = get_face_centroids(target)
     matches = []
@@ -44,15 +46,15 @@ def DeleteBoolean(source,target):
         else:
             newObjUUID = cmds.ls(newObj,uuid=True)
             try:
-                cmds.delete(newMesh, ch=True)
+                cmds.delete(cmds.ls(newObjUUID), ch=True)
             except:pass
     objDeletes = cmds.ls([source + "NLTA_dup",target + "NLTA_dup"])
     for objDelete in objDeletes:
         objTempUUID = cmds.ls(objDelete,uuid=True)
         if objTempUUID != newObjUUID:
             cmds.delete(objDelete)
-    faceIDs = FindMatchingFaces(source + "NLTA_dup",target)
-    cmds.delete([f"{target}.f[%a]" % a for a in faceIDs],source + "NLTA_dup")
+    faceIDs = FindMatchingFaces(cmds.ls(newObjUUID)[0],target)
+    cmds.delete([f"{target}.f[%a]" % a for a in faceIDs],cmds.ls(newObjUUID))
     
 def DeleteBooleanRun(*arr):
     objs = cmds.ls(selection=True)
