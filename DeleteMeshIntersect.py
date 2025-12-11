@@ -21,8 +21,6 @@ def get_face_centroids(mesh):
     return centroids
 
 def FindMatchingFaces(source,target, tolerance=0.001):
-    print(source)
-    print(target)
     centA = get_face_centroids(source)
     centB = get_face_centroids(target)
     matches = []
@@ -129,3 +127,4 @@ cmds.button(label="Delete Inverse", command=partial(DeleteIntersect,True),height
 cmds.button(label="Delete Boolean", command=DeleteBooleanRun,height=50)
 cmds.setParent("..")
 cmds.showWindow(window)
+
