@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+import maya.mel as mel
 import maya.api.OpenMaya as om
 from functools import partial
 
@@ -30,12 +31,28 @@ def FindMatchingFaces(source,target, tolerance=0.001):
     return matches
 
 def DeleteBoolean(source,target):
-    sourceDup = cmds.duplicate(source, name=source + "_dup")[0]
-    targetDup = cmds.duplicate(target, name=target + "_dup")[0]
-    newMesh = cmds.polyBoolOp(sourceDup,targetDup, op=3)[0]
-    cmds.delete(newMesh, ch=True)
-    faceIDs = FindMatchingFaces(newMesh,target)
-    cmds.delete([f"{target}.f[%a]" % a for a in faceIDs],newMesh)
+    sourceDup = cmds.duplicate(source, name=source + "NLTA_dup")[0]
+    targetDup = cmds.duplicate(target, name=target + "NLTA_dup")[0]
+    cmds.select([sourceDup,targetDup])
+    mesh_name = mel.eval(
+        'PolygonBooleanIntersection;'
+    )
+    newObjs = cmds.ls(selection=True)
+    for newObj in newObjs:
+        if cmds.objectType(newObj) == "polyCBoolOp":
+            cmds.delete(newObj)
+        else:
+            newObjUUID = cmds.ls(newObj,uuid=True)
+            try:
+                cmds.delete(newMesh, ch=True)
+            except:pass
+    objDeletes = cmds.ls([source + "NLTA_dup",target + "NLTA_dup"])
+    for objDelete in objDeletes:
+        objTempUUID = cmds.ls(objDelete,uuid=True)
+        if objTempUUID != newObjUUID:
+            cmds.delete(objDelete)
+    faceIDs = FindMatchingFaces(source + "NLTA_dup",target)
+    cmds.delete([f"{target}.f[%a]" % a for a in faceIDs],source + "NLTA_dup")
     
 def DeleteBooleanRun(*arr):
     objs = cmds.ls(selection=True)
